@@ -2,169 +2,306 @@
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Diário Mobile Oficial</title>
-
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Diário Mobile</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-
     <style>
-      :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --light: #f8f9fa; }
-      body { font-family: sans-serif; background: #eaedf1; margin: 0; padding: 10px; }
-      .container { max-width: 600px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-      .stats { display: flex; justify-content: space-around; background: var(--light); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-weight: bold; border: 1px solid #ddd; }
-      .tabs { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-      .tab-btn { padding: 10px 15px; border: none; background: #dcdde1; border-radius: 8px; font-weight: bold; white-space: nowrap; cursor: pointer; }
-      .tab-btn.active { background: var(--primary); color: white; }
-      table { width: 100%; border-collapse: collapse; }
-      tr { cursor: pointer; }
-      tr:hover { background-color: #f1f1f1; }
-      td { padding: 15px 10px; border-bottom: 1px solid #eee; font-size: 16px; }
-      .presence-check { width: 30px; height: 30px; cursor: pointer; pointer-events: none; } /* Deixa o clique passar para a linha */
-      .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-      .btn { padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; color: white; font-size: 14px; text-align: center; }
-      .btn-sync { background: var(--primary); grid-column: span 2; }
-      .btn-pdf { background: var(--danger); grid-column: span 2; }
-      .btn-admin { background: #8e44ad; display: none; grid-column: span 2; }
-      #statusLoader { text-align: center; color: #8e44ad; font-weight: bold; padding: 10px; }
+      :root {
+        --primary: #2c3e50;
+        --success: #27ae60;
+        --danger: #e74c3c;
+        --light: #f8f9fa;
+      }
+      body {
+        font-family: sans-serif;
+        background: #eaedf1;
+        margin: 0;
+        padding: 10px;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        background: var(--light);
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        font-weight: bold;
+        border: 1px solid #ddd;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 15px;
+        overflow-x: auto;
+        padding-bottom: 5px;
+      }
+      .tab-btn {
+        padding: 10px 15px;
+        border: none;
+        background: #dcdde1;
+        border-radius: 8px;
+        font-weight: bold;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .tab-btn.active {
+        background: var(--primary);
+        color: white;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      tr {
+        cursor: pointer;
+        height: 60px;
+      }
+      tr:hover {
+        background: #f9f9f9;
+      }
+      td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 18px;
+      }
+      input[type="checkbox"] {
+        transform: scale(1.8);
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .btn {
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+      }
+      .btn-sync {
+        background: var(--primary);
+        grid-column: span 2;
+      }
+      .btn-pdf {
+        background: var(--danger);
+        grid-column: span 2;
+      }
+      .btn-admin {
+        background: #8e44ad;
+        display: none;
+        grid-column: span 2;
+        margin-top: 10px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2 style="text-align: center; color: var(--primary)">Diário de Classe</h2>
-      <div id="statusLoader">Iniciando sistema...</div>
+      <h2 style="text-align: center; color: var(--primary)">
+        Diário de Classe
+      </h2>
+      <div
+        id="status"
+        style="
+          text-align: center;
+          font-weight: bold;
+          color: #8e44ad;
+          margin-bottom: 10px;
+        "
+      >
+        Carregando...
+      </div>
 
       <div class="stats">
         <span>Turma: <span id="nomeTurma">-</span></span>
-        <span>Presentes: <span id="txtPres">0</span> / <span id="txtTotal">0</span></span>
+        <span><span id="txtPres">0</span> / <span id="txtTotal">0</span></span>
       </div>
 
       <div class="tabs" id="tabContainer"></div>
-      <table><tbody id="corpoTabela"></tbody></table>
+      <table>
+        <tbody id="corpoTabela"></tbody>
+      </table>
 
       <div class="actions">
-        <button class="btn btn-sync" onclick="sincronizarComGoogle()">☁️ Salvar Chamada na Nuvem</button>
-        <button class="btn btn-pdf" onclick="exportarPDF()">📄 Gerar PDF da Chamada</button>
-        <button id="btnImportar" class="btn btn-admin" onclick="document.getElementById('inputExcel').click()">📥 Importar Excel (Admin)</button>
-        <input type="file" id="inputExcel" accept=".xlsx, .xls" style="display: none" />
+        <button class="btn btn-sync" onclick="sincronizar()">
+          ☁️ Salvar Chamada na Nuvem
+        </button>
+        <button class="btn btn-pdf" onclick="gerarPDF()">📄 Gerar PDF</button>
+        <button
+          id="btnImportar"
+          class="btn btn-admin"
+          onclick="document.getElementById('inputExcel').click()"
+        >
+          📥 Importar Excel (Admin)
+        </button>
+        <input
+          type="file"
+          id="inputExcel"
+          accept=".xlsx, .xls"
+          style="display: none"
+        />
       </div>
     </div>
 
     <script>
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbytoKaTdjAwME_lB2Ay7G3eDzgkwdmnJ18f9lRpOeeK0NVaNC300mOgrYl6IhEv95c1Fg/exec";
+      // COLE SEU LINK NOVO AQUI EMBAIXO:
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbzCLM72OmWrrDpgkAaV1Botcg_ZuztokHFh9tzlzIbpd8DmuOAY-ctDrZauRVXKQIdUyQ/exec";
 
       let dadosAlunos = JSON.parse(localStorage.getItem("diario_cloud")) || [];
       let turmaAtual = "";
 
-      // REATIVAÇÃO DO MODO ADMIN
+      // MOSTRAR ADMIN SE TIVER ?admin=1 NA URL
       if (window.location.search.includes("admin=1")) {
         document.getElementById("btnImportar").style.display = "block";
       }
 
-      async function inicializarApp() {
-        const loader = document.getElementById("statusLoader");
+      async function inicializar() {
         try {
-          const response = await fetch(SCRIPT_URL);
-          const dadosNuvem = await response.json();
-          if (dadosNuvem && dadosNuvem.length > 0) {
-            dadosAlunos = dadosNuvem.map((a) => ({ nome: a.Nome, turma: a.Turma, presente: false }));
+          const res = await fetch(SCRIPT_URL);
+          const nuvem = await res.json();
+          if (nuvem.length > 0) {
+            dadosAlunos = nuvem.map((a) => ({
+              nome: a.Nome,
+              turma: a.Turma,
+              presente: false,
+            }));
             localStorage.setItem("diario_cloud", JSON.stringify(dadosAlunos));
           }
-        } catch (e) { console.log("Usando dados locais."); }
-        
-        if (dadosAlunos.length > 0) {
-          const turmasDisponiveis = [...new Set(dadosAlunos.map((a) => a.turma))];
-          turmaAtual = turmasDisponiveis[0]; // Força a primeira turma
-          renderizarTudo();
+        } catch (e) {
+          console.log("Erro ao buscar nuvem");
         }
-        loader.style.display = "none";
+
+        if (dadosAlunos.length > 0) {
+          turmaAtual = [...new Set(dadosAlunos.map((a) => a.turma))][0];
+          renderizar();
+        }
+        document.getElementById("status").style.display = "none";
       }
 
-      function renderizarTudo() {
-        const tabContainer = document.getElementById("tabContainer");
+      function renderizar() {
+        const tabs = document.getElementById("tabContainer");
         const corpo = document.getElementById("corpoTabela");
         const turmas = [...new Set(dadosAlunos.map((a) => a.turma))];
 
-        tabContainer.innerHTML = "";
+        tabs.innerHTML = "";
         turmas.forEach((t) => {
           const btn = document.createElement("button");
           btn.className = `tab-btn ${t === turmaAtual ? "active" : ""}`;
           btn.innerText = t;
-          btn.onclick = () => { turmaAtual = t; renderizarTudo(); };
-          tabContainer.appendChild(btn);
+          btn.onclick = () => {
+            turmaAtual = t;
+            renderizar();
+          };
+          tabs.appendChild(btn);
         });
 
         corpo.innerHTML = "";
         const filtrados = dadosAlunos.filter((a) => a.turma === turmaAtual);
-
         filtrados.forEach((aluno) => {
           const tr = document.createElement("tr");
-          tr.onclick = () => alternarPresenca(aluno.nome);
-          tr.innerHTML = `
-            <td>${aluno.nome}</td>
-            <td align="right">
-                <input type="checkbox" class="presence-check" ${aluno.presente ? "checked" : ""}>
-            </td>`;
+          tr.onclick = (e) => {
+            if (e.target.type !== "checkbox") {
+              const ck = tr.querySelector("input");
+              ck.checked = !ck.checked;
+              atualizar(aluno.nome, ck.checked);
+            }
+          };
+          tr.innerHTML = `<td>${aluno.nome}</td><td align="right"><input type="checkbox" ${aluno.presente ? "checked" : ""} onchange="atualizar('${aluno.nome}', this.checked)"></td>`;
           corpo.appendChild(tr);
         });
 
         document.getElementById("nomeTurma").innerText = turmaAtual;
         document.getElementById("txtTotal").innerText = filtrados.length;
-        document.getElementById("txtPres").innerText = filtrados.filter(a => a.presente).length;
+        document.getElementById("txtPres").innerText = filtrados.filter(
+          (a) => a.presente,
+        ).length;
       }
 
-      function alternarPresenca(nome) {
-        const idx = dadosAlunos.findIndex((a) => a.nome === nome);
-        dadosAlunos[idx].presente = !dadosAlunos[idx].presente;
-        renderizarTudo();
+      function atualizar(nome, status) {
+        const i = dadosAlunos.findIndex((a) => a.nome === nome);
+        dadosAlunos[i].presente = status;
+        document.getElementById("txtPres").innerText = dadosAlunos.filter(
+          (a) => a.turma === turmaAtual && a.presente,
+        ).length;
       }
 
-      async function sincronizarComGoogle() {
-        if (!turmaAtual) return alert("Selecione uma turma.");
-        const dadosParaEnviar = {
+      async function sincronizar() {
+        const loading = document.getElementById("status");
+        loading.style.display = "block";
+        loading.innerText = "Salvando...";
+        const pacote = {
           turma: turmaAtual,
-          data: new Date().toLocaleDateString(),
+          data: new Date().toLocaleDateString("pt-BR"),
           alunos: dadosAlunos.filter((a) => a.turma === turmaAtual),
         };
-        document.getElementById("statusLoader").style.display = "block";
-        document.getElementById("statusLoader").innerText = "Enviando...";
         try {
-          await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(dadosParaEnviar) });
-          alert(`Chamada da turma ${turmaAtual} enviada!`);
-        } catch (e) { alert("Erro ao salvar."); }
-        document.getElementById("statusLoader").style.display = "none";
+          await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(pacote),
+          });
+          alert("Salvo com sucesso na planilha!");
+        } catch (e) {
+          alert("Erro ao salvar");
+        }
+        loading.style.display = "none";
       }
 
-      function exportarPDF() {
+      function gerarPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text(`Chamada: ${turmaAtual} - Data: ${new Date().toLocaleDateString()}`, 14, 15);
-        const rows = dadosAlunos.filter((a) => a.turma === turmaAtual).map((a) => [a.nome, a.presente ? "P" : "F"]);
-        doc.autoTable({ head: [["Nome", "Presença"]], body: rows, startY: 20 });
+        doc.text(
+          `Chamada: ${turmaAtual} - ${new Date().toLocaleDateString()}`,
+          14,
+          15,
+        );
+        const linhas = dadosAlunos
+          .filter((a) => a.turma === turmaAtual)
+          .map((a) => [a.nome, a.presente ? "P" : "F"]);
+        doc.autoTable({
+          head: [["Nome", "Presença"]],
+          body: linhas,
+          startY: 20,
+        });
         doc.save(`Chamada_${turmaAtual}.pdf`);
       }
 
-      document.getElementById("inputExcel").addEventListener("change", function (e) {
-        const reader = new FileReader();
-        reader.onload = function (evt) {
-          const wb = XLSX.read(evt.target.result, { type: "binary" });
-          const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-          dadosAlunos = json.map(item => ({
-            nome: (item["Nome "] || item.Nome).toString().trim(),
-            turma: (item.Turma).toString().trim(),
-            presente: false
-          }));
-          localStorage.setItem("diario_cloud", JSON.stringify(dadosAlunos));
-          turmaAtual = dadosAlunos[0].turma;
-          renderizarTudo();
-        };
-        reader.readAsBinaryString(e.target.files[0]);
-      });
+      document
+        .getElementById("inputExcel")
+        .addEventListener("change", function (e) {
+          const reader = new FileReader();
+          reader.onload = function (evt) {
+            const wb = XLSX.read(evt.target.result, { type: "binary" });
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            dadosAlunos = json.map((item) => ({
+              nome: (item.Nome || item["Nome "]).toString().trim(),
+              turma: item.Turma.toString().trim(),
+              presente: false,
+            }));
+            localStorage.setItem("diario_cloud", JSON.stringify(dadosAlunos));
+            turmaAtual = dadosAlunos[0].turma;
+            renderizar();
+          };
+          reader.readAsBinaryString(e.target.files[0]);
+        });
 
-      window.onload = inicializarApp;
+      window.onload = inicializar;
     </script>
   </body>
 </html>
-
-
