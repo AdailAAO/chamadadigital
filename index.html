@@ -163,6 +163,36 @@
       const SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbzCLM72OmWrrDpgkAaV1Botcg_ZuztokHFh9tzlzIbpd8DmuOAY-ctDrZauRVXKQIdUyQ/exec";
 
+      async function sincronizarComGoogle() {
+        if (!turmaAtual) return alert("Selecione uma turma primeiro!");
+
+        const status = document.getElementById("statusLoader");
+        status.style.display = "block";
+        status.innerText = "Salvando na nuvem...";
+
+        const pacote = {
+          turma: turmaAtual,
+          data: new Date().toLocaleDateString("pt-BR"),
+          alunos: dadosAlunos.filter((a) => a.turma === turmaAtual),
+        };
+
+        try {
+          // O segredo está no 'POST' e no pacote convertido em texto
+          await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify(pacote),
+          });
+          alert(
+            "Sucesso! A chamada da " +
+              turmaAtual +
+              " foi enviada para o Drive.",
+          );
+        } catch (e) {
+          alert("Erro de conexão: " + e.message);
+        }
+        status.style.display = "none";
+      }
       let dadosAlunos = JSON.parse(localStorage.getItem("diario_cloud")) || [];
       let turmaAtual = "";
 
